@@ -16,7 +16,7 @@ exports.createUserMessage = async (req, res) => {
         text,  // Corrected property name
       });
 
-      res.json({ success: true, message: 'User message created successfully', data: userMessage });
+      res.json(userMessage);
     } else {
       throw new Error('Invalid user identity');
     }
@@ -40,7 +40,7 @@ exports.createGroupMessage = async (req, res) => {
         text,  // Corrected property name
       });
 
-      res.json({ success: true, message: 'Group message created successfully', data: groupMessage });
+      res.json(groupMessage);
     } else {
       throw new Error('Invalid user identity');
     }

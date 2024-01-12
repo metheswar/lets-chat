@@ -1,23 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Paper, Typography } from '@mui/material';
-import io from 'socket.io-client';
 
 const ChatMessages = ({ theme, selectedUser, selectedGroup, tabValue }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const userId = localStorage.getItem('userId');
-  const socket = io('http://localhost:3001');
-  useEffect(()=>{
-    socket.emit('join-room',userId)
-    socket.on('roomJoined', (data) => {  // Change to 'roomJoined'
-        console.log(data);  // Log the data to check if room join is successful
-      });
-  },[])
-
-  useEffect(()=>{
-      socket.on('newUserMessage', (newMessage) => {
-        setChatMessages((prevMessages) => [...prevMessages, newMessage]);
-      });
-  })
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -40,24 +26,23 @@ const ChatMessages = ({ theme, selectedUser, selectedGroup, tabValue }) => {
       }
     };
 
-    // Fetch messages initially
     if (tabValue === 'users' && selectedUser) {
       fetchMessages();
     } else {
       setChatMessages([]);
     }
 
-    // Set up socket listener for new messages
-    socket.on('newMessage', (newMessage) => {
-      setChatMessages((prevMessages) => [...prevMessages, newMessage]);
-    });
+    const fetchInterval = setInterval(() => {
+      if (tabValue === 'users' && selectedUser) {
+        fetchMessages();
+      }
+    }, 1000);
 
+    // Clear the interval when the component is unmounted
     return () => {
-      // Disconnect socket when component unmounts
-      socket.disconnect();
+      clearInterval(fetchInterval);
     };
-
-  }, [tabValue, selectedUser]);
+  }, [tabValue, selectedUser, userId]);
 
   const isChatActive = tabValue === 'users' ? selectedUser : selectedGroup;
 
@@ -76,17 +61,17 @@ const ChatMessages = ({ theme, selectedUser, selectedGroup, tabValue }) => {
                   marginBottom: theme.spacing(1),
                   padding: theme.spacing(2),
                   width: 'fit-content',
-                  marginLeft: message.fromUserId === userId ? 'auto' : 1,
-                  marginRight: message.fromUserId === userId ? 1 : 'auto',
+                  marginLeft: message.fromUserId == userId ? 'auto' : 1,
+                  marginRight: message.fromUserId == userId ? 1 : 'auto',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems:
-                    message.fromUserId === userId ? 'flex-end' : 'flex-start',
+                    message.fromUserId == userId ? 'flex-end' : 'flex-start',
                 }}
               >
                 <div style={{ textAlign: 'right', flex: 1 }}>
                   <Typography variant="body1">
-                    {`${message.fromUserId === userId ? 'You' : 'User'}: ${message.text}`}
+                    {`${message.fromUserId == userId ? 'You' : 'User'}: ${message.text}`}
                   </Typography>
                   <small style={{ color: 'blue' }}>
                     {new Date(message.createdAt).toLocaleTimeString('en-US', {

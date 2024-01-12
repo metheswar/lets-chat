@@ -15,85 +15,83 @@ const StyledTextareaAutosize = styled(BaseTextareaAutosize)`
     outline: 0;
   }
 `;
+
 const ChatInput = ({ isSmallScreen, selectedUser, selectedGroup, currentTab }) => {
-    const [message, setMessage] = useState('');
-  
-    const createUserMessage = async (token, requestBody) => {
-      try {
-        const response = await fetch('http://localhost:3001/createUserMessage', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestBody),
-        });
-  
-        const data = await response.json();
-        console.log('User message created:', data);
-      } catch (error) {
-        console.error('Error creating user message:', error);
-      }
-    };
-  
-    const createGroupMessage = async (token, requestBody) => {
-      try {
-        const response = await fetch('http://localhost:3001/createGroupMessage', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(requestBody),
-        });
-  
-        const data = await response.json();
-        console.log('Group message created:', data);
-      } catch (error) {
-        console.error('Error creating group message:', error);
-      }
-    };
-  
-    const handleSendButtonClick = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const fromUserId = localStorage.getItem('userId'); // Assuming 'userId' is the key
-        const requestBody = { text: message, fromUserId };
-  
-        if (currentTab === 'users' && selectedUser) {
-          // Create user message
-          requestBody.toUserId = selectedUser;
-          await createUserMessage(token, requestBody);
-        } else if (currentTab === 'groups' && selectedGroup) {
-          // Create group message
-          requestBody.groupId = selectedGroup;
-          await createGroupMessage(token, requestBody);
-        }
-  
-        // Clear the message input
-        setMessage('');
-      } catch (error) {
-        console.error('Error sending message:', error);
-      }
-    };
-  
-    return (
-      <Grid container spacing={1} alignItems="flex-end">
-        <Grid item xs={isSmallScreen ? 9 : 11}>
-          <StyledTextareaAutosize
-            maxRows={2}
-            placeholder="Type your message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-          />
-        </Grid>
-        <Grid item xs={isSmallScreen ? 3 : 1}>
-          <Button variant="contained" color="primary" onClick={handleSendButtonClick}>
-            Send
-          </Button>
-        </Grid>
-      </Grid>
-    );
+  const [message, setMessage] = useState('');
+
+  const createUserMessage = async (token, requestBody) => {
+    try {
+      const response = await fetch('http://localhost:3001/createUserMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+      console.log('User message created:', data);
+    } catch (error) {
+      console.error('Error creating user message:', error);
+    }
   };
-  
-  export default ChatInput;
+
+  const createGroupMessage = async (token, requestBody) => {
+    try {
+      const response = await fetch('http://localhost:3001/createGroupMessage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const data = await response.json();
+      console.log('Group message created:', data);
+    } catch (error) {
+      console.error('Error creating group message:', error);
+    }
+  };
+
+  const handleSendButtonClick = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const fromUserId = localStorage.getItem('userId');
+      const requestBody = { text: message, fromUserId };
+
+      if (currentTab === 'users' && selectedUser) {
+        requestBody.toUserId = selectedUser;
+        await createUserMessage(token, requestBody);
+      } else if (currentTab === 'groups' && selectedGroup) {
+        requestBody.groupId = selectedGroup;
+        await createGroupMessage(token, requestBody);
+      }
+
+      setMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  return (
+    <Grid container spacing={1} alignItems="flex-end">
+      <Grid item xs={isSmallScreen ? 9 : 11}>
+        <StyledTextareaAutosize
+          maxRows={2}
+          placeholder="Type your message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+      </Grid>
+      <Grid item xs={isSmallScreen ? 3 : 1}>
+        <Button variant="contained" color="primary" onClick={handleSendButtonClick}>
+          Send
+        </Button>
+      </Grid>
+    </Grid>
+  );
+};
+
+export default ChatInput;

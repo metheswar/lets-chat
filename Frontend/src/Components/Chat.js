@@ -24,31 +24,41 @@ const Chat = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [drawerOpen, setDrawerOpen] = useState(isSmallScreen);
   const [users, setUsers] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [tabValue, setTabValue] = useState('users');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
 
-  const fetchTabData = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(
-        tabValue === 'users' ? 'http://localhost:3001/getUsers' : 'http://localhost:3001/getGroups',
-        {
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+
+        // Fetch users
+        const usersResponse = await fetch('http://localhost:3001/getUsers', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
-      const data = await response.json();
-      setUsers(data);
-      console.log(`${tabValue} fetched:`, data);
-      console.log(`${tabValue} state:`, users);
-    } catch (error) {
-      console.error(`Error fetching ${tabValue}:`, error);
-    }
-  };
+        });
+        const usersData = await usersResponse.json();
+        setUsers(usersData);
 
-  useEffect(() => {
-    fetchTabData();
-  }, [tabValue]);
+        // Fetch groups
+        const groupsResponse = await fetch('http://localhost:3001/getGroups', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const groupsData = await groupsResponse.json();
+        setGroups(groupsData);
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
 
   const toggleDrawer = (open) => (event) => {
     if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
@@ -59,14 +69,9 @@ const Chat = () => {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
-  };
-
-  const chatMessages = [
-    { sender: 'User 1', text: 'Hello!', timestamp: Date.now() },
-    { sender: 'User 2', text: 'Hi there!', timestamp: Date.now() + 1000 },
-  ];
-  const handleSendButtonClick = () => {
-
+    // Reset selectedUser and selectedGroup when tab changes
+    setSelectedUser(null);
+    setSelectedGroup(null);
   };
 
   return (
@@ -74,20 +79,31 @@ const Chat = () => {
       <Container maxWidth="xl" style={{ display: 'flex', flexDirection: 'column', height: '80vh' }}>
         <Grid container style={{ flexGrow: 1, marginTop: theme.spacing(2) }}>
           {isSmallScreen ? (
-          <AppDrawer
-          drawerOpen={drawerOpen}
-          toggleDrawer={toggleDrawer}
-          users={users}
-          tabValue={tabValue}
-          theme={theme}
-          ColorTabs={ColorTabs}
-          handleTabChange={handleTabChange}
-          />
+            <AppDrawer
+              drawerOpen={drawerOpen}
+              toggleDrawer={toggleDrawer}
+              users={users}
+              groups={groups}
+              theme={theme}
+              ColorTabs={ColorTabs}
+              handleTabChange={handleTabChange}
+              tabValue={tabValue}
+              setSelectedUser={setSelectedUser}
+              setSelectedGroup={setSelectedGroup}
+            />
           ) : (
             <Grid item xs={12} sm={6} md={4} lg={3} style={{ paddingRight: theme.spacing(2) }}>
               <Input placeholder="Search users" fullWidth style={{ marginBottom: theme.spacing(2) }} />
-              <ColorTabs value={tabValue} handleChange={handleTabChange} />
-              <UsersList users={users} tabValue={tabValue} />
+              <ColorTabs value={tabValue} handleChange={handleTabChange} allUsers={tabValue === 'users' ? users : groups} />
+
+              {/* Pass setSelectedUser and setSelectedGroup as props to UsersList */}
+              <UsersList
+                users={users}
+                groups={groups}
+                tabValue={tabValue}
+                setSelectedUser={setSelectedUser}
+                setSelectedGroup={setSelectedGroup}
+              />
             </Grid>
           )}
 
@@ -106,10 +122,22 @@ const Chat = () => {
                 </Toolbar>
               </AppBar>
 
-              <ChatMessages chatMessages={chatMessages} theme={theme} />
+              {/* Render ChatMessages component with selectedUser and selectedGroup */}
+              <ChatMessages
+                theme={theme}
+                selectedUser={selectedUser}
+                selectedGroup={selectedGroup}
+                tabValue={tabValue}
+              />
             </div>
 
-            <ChatInput isSmallScreen={isSmallScreen} handleSendButtonClick={handleSendButtonClick} />
+            {/* Render ChatInput component with selectedUser and selectedGroup */}
+            <ChatInput
+              isSmallScreen={isSmallScreen}
+              selectedUser={selectedUser}
+              selectedGroup={selectedGroup}
+              currentTab={tabValue}
+            />
           </Grid>
         </Grid>
       </Container>

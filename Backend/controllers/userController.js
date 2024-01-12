@@ -40,7 +40,7 @@ try {
         res.status(401).json({message:'Invalid email or password'})
     }
     const token = generateToken(user.id)
-    res.status(200).json({success:true,token:token})
+    res.status(200).json({success:true,token:token,userId:user.id})
 } catch (error) {
   console.error(error);
   return res.status(500).json({ error: 'Internal Server Error' });
@@ -73,15 +73,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-const getGroups = async(req,res)=>{
-  try {
-    const groups = await Group.findAll();
-    res.status(200).json(groups)
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error' });
-  }
-}
 
-module.exports = { register, login,getUsers ,getGroups};
+
+module.exports = { register, login,getUsers};
 

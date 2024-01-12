@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,12 +12,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutHandler } from '../store/authSlice';
 
+
 const Navbar = () => {
   const [isMobileView, setMobileView] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const login = useSelector((state) => state.authentication.authenticated);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
 
   const handleToggleDrawer = () => {
     setDrawerOpen(!isDrawerOpen);
@@ -27,10 +29,12 @@ const Navbar = () => {
     setMobileView(window.innerWidth <= 768);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener('resize', updateWindowDimensions);
     return () => window.removeEventListener('resize', updateWindowDimensions);
   }, []);
+
+
 
   const handleSignUpClick = () => {
     navigate('/signup');
@@ -41,11 +45,12 @@ const Navbar = () => {
   };
 
   const handleLogoutClick = () => {
-    dispatch(logoutHandler())
-    localStorage.removeItem('token')
-    navigate('/')
-  };
 
+
+    dispatch(logoutHandler());
+    localStorage.removeItem('token');
+    navigate('/');
+  };
   return (
     <AppBar position="static" sx={{ backgroundColor: '#FFC107' }}>
       <Toolbar disableGutters sx={{ marginLeft: '10px', marginRight: '10px' }}>

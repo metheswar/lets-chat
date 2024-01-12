@@ -51,6 +51,7 @@ const Signin = () => {
       if (data.success) {
         dispatch(loginHandler());
         localStorage.setItem('token',data.token)
+        localStorage.setItem('userId',data.userId)
         navigate('/chats');
       } else {
         throw new Error('Login failed. Please try again.');

@@ -7,7 +7,7 @@ const Home = () => {
 
   return (
     <div style={{ overflow: 'auto' }}>
-      <Container sx={{ marginTop: '5rem', paddingBottom: '60px' }}>
+      <Container sx={{ marginTop: '4rem', paddingBottom: '60px' }}>
         <Grid container spacing={3}>
           {/* Left side - Image */}
           <Grid item xs={12} md={6}>

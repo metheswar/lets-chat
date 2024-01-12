@@ -9,12 +9,15 @@ import Drawer from '@mui/material/Drawer';
 import { Divider } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutHandler } from '../store/authSlice';
 
 const Navbar = () => {
   const [isMobileView, setMobileView] = useState(window.innerWidth <= 768);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
-
+  const login = useSelector((state) => state.authentication.authenticated);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleToggleDrawer = () => {
     setDrawerOpen(!isDrawerOpen);
@@ -35,6 +38,12 @@ const Navbar = () => {
 
   const handleSignInClick = () => {
     navigate('/signin');
+  };
+
+  const handleLogoutClick = () => {
+    dispatch(logoutHandler())
+    localStorage.removeItem('token')
+    navigate('/')
   };
 
   return (
@@ -76,33 +85,54 @@ const Navbar = () => {
 
         {!isMobileView && (
           <Box sx={{ flexGrow: 0, display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-            <Button
-              variant="text"
-              color="primary"
-              sx={{
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: '#00A9FF',
-                },
-              }}
-              onClick={handleSignUpClick}
-            >
-              Sign Up
-            </Button>
-            <Button
-              variant="text"
-              color="primary"
-              sx={{
-                color: 'white',
-                marginLeft: 3,
-                '&:hover': {
-                  backgroundColor: '#00A9FF',
-                },
-              }}
-              onClick={handleSignInClick}
-            >
-              Sign In
-            </Button>
+            {!login && (
+              <>
+                <Button
+                  variant="text"
+                  color="primary"
+                  sx={{
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#00A9FF',
+                    },
+                  }}
+                  onClick={handleSignUpClick}
+                >
+                  Sign Up
+                </Button>
+                <Button
+                  variant="text"
+                  color="primary"
+                  sx={{
+                    color: 'white',
+                    marginLeft: 3,
+                    '&:hover': {
+                      backgroundColor: '#00A9FF',
+                    },
+                  }}
+                  onClick={handleSignInClick}
+                >
+                  Sign In
+                </Button>
+              </>
+            )}
+
+            {login && (
+              <Button
+                variant="text"
+                color="primary"
+                sx={{
+                  color: 'white',
+                  marginLeft: 3,
+                  '&:hover': {
+                    backgroundColor: '#00A9FF',
+                  },
+                }}
+                onClick={handleLogoutClick}
+              >
+                Logout
+              </Button>
+            )}
           </Box>
         )}
       </Toolbar>
@@ -119,13 +149,25 @@ const Navbar = () => {
           }}
           role="presentation"
         >
-          <Button variant="text" sx={{ color: 'white' }} onClick={handleSignUpClick}>
-            Sign Up
-          </Button>
-          <Divider sx={{ width: '100%', backgroundColor: 'white' }} />
-          <Button variant="text" sx={{ color: 'white' }} onClick={handleSignInClick}>
-            Sign In
-          </Button>
+          {!login && (
+            <>
+              <Button variant="text" sx={{ color: 'white' }} onClick={handleSignUpClick}>
+                Sign Up
+              </Button>
+              <Divider sx={{ width: '100%', backgroundColor: 'white' }} />
+              <Button variant="text" sx={{ color: 'white' }} onClick={handleSignInClick}>
+                Sign In
+              </Button>
+            </>
+          )}
+
+          {login && (
+            <>
+              <Button variant="text" sx={{ color: 'white' }} onClick={handleLogoutClick}>
+                Logout
+              </Button>
+            </>
+          )}
         </Box>
       </Drawer>
     </AppBar>

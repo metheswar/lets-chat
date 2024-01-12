@@ -1,6 +1,8 @@
+const { Op } = require('sequelize');
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-
+const Group = require('../models/group');
+const { generateToken, verifyToken } = require('../helpers/JwtToken');
 const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -37,11 +39,49 @@ try {
         console.log(false)
         res.status(401).json({message:'Invalid email or password'})
     }
-    res.status(200).json({success:true})
+    const token = generateToken(user.id)
+    res.status(200).json({success:true,token:token})
 } catch (error) {
-    
+  console.error(error);
+  return res.status(500).json({ error: 'Internal Server Error' });
 }
 };
+const getUsers = async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decodedToken = verifyToken(token);
 
-module.exports = { register, login };
+    if (!decodedToken) {
+      return res.status(400).json({ error: 'Invalid token' });
+    }
+
+    const currentUserId = decodedToken.userId;
+
+    const users = await User.findAll({
+      attributes: ['name', 'id'],
+      where: {
+        id: {
+          [Op.ne]: currentUserId, 
+        },
+      },
+    });
+
+    res.status(200).json(users);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getGroups = async(req,res)=>{
+  try {
+    const groups = await Group.findAll();
+    res.status(200).json(groups)
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+module.exports = { register, login,getUsers ,getGroups};
 

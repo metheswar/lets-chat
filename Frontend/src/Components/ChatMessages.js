@@ -5,7 +5,19 @@ import io from 'socket.io-client';
 const ChatMessages = ({ theme, selectedUser, selectedGroup, tabValue }) => {
   const [chatMessages, setChatMessages] = useState([]);
   const userId = localStorage.getItem('userId');
-  const socket = io('http://localhost:3001'); // Change the URL to match your server
+  const socket = io('http://localhost:3001');
+  useEffect(()=>{
+    socket.emit('join-room',userId)
+    socket.on('roomJoined', (data) => {  // Change to 'roomJoined'
+        console.log(data);  // Log the data to check if room join is successful
+      });
+  },[])
+
+  useEffect(()=>{
+      socket.on('newUserMessage', (newMessage) => {
+        setChatMessages((prevMessages) => [...prevMessages, newMessage]);
+      });
+  })
 
   useEffect(() => {
     const fetchMessages = async () => {

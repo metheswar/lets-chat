@@ -25,29 +25,26 @@ Group.hasMany(Message, { foreignKey: 'groupId' });
 Group.belongsTo(User, { as: 'groupAdmin', foreignKey: 'groupAdminId' });
 
 const app = express();
-app.use(cors());
+app.use(cors());  // Enable CORS for Express
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketIO(server, {
+  cors: {
+    origin: "*",  // Specify the URL of your client app
+    methods: ["GET", "POST"]
+  }
+});
 
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  socket.on('join-room', (roomId) => {  // Change to 'join-room'
+    // You can handle the room join logic here
+    console.log(roomId)
+    socket.join(roomId);
 
-  socket.on('createUserMessage', (newMessage, callback) => {
-    // Save the message to the database or perform any other necessary operations
-    // ...
-
-    // Emit the new user message to all clients
-    io.emit('newUserMessage', newMessage);
-
-    // Acknowledge the message creation
-    callback({ success: true, message: 'User message created successfully', data: newMessage });
-  });
-
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
+    // You can emit an event or perform other actions upon successful room join
+    io.to(roomId).emit('roomJoined', { success: true, message: 'User joined the room' });
   });
 });
 
